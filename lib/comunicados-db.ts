@@ -106,7 +106,9 @@ const pickingJsonPath = path.join(
   "comunicados-picking.json"
 );
 
-let dbInstance: Database.Database | null = null;
+type SqliteDatabase = InstanceType<typeof Database>;
+
+let dbInstance: SqliteDatabase | null = null;
 
 function ensureDataDir() {
   if (!fs.existsSync(dataDir)) {
@@ -174,7 +176,7 @@ function loadJsonFile<T>(filePath: string): T[] {
   }
 }
 
-function seedComunicados(db: Database.Database) {
+function seedComunicados(db: SqliteDatabase) {
   const count = db
     .prepare("SELECT COUNT(*) as total FROM comunicados")
     .get() as { total: number };
