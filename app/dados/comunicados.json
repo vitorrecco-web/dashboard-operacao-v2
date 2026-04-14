@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1776103575936,
+    "titulo": "novo novo comunicado",
+    "tag": "sfer",
+    "resumo": "err",
+    "conteudo": "dfdfdf",
+    "data": "2026-04-13",
+    "novo": true,
+    "fixado": true,
+    "tipo": "geral",
+    "setor": null
+  },
+  {
+    "id": 1,
+    "titulo": "Horário dos fretados",
+    "tag": "Departamento Pessoal",
+    "resumo": "Atualização dos horários de saída dos fretados no turno da noite.",
+    "conteudo": "Informamos que, a partir desta semana, os horários dos fretados do turno da noite foram ajustados.\n\nPedimos que todos os supervisores orientem suas equipes sobre os novos horários e reforcem a importância de organização na saída.\n\nEm caso de dúvidas, o time de Departamento Pessoal deverá ser acionado.",
+    "data": "2025-09-10",
+    "novo": true,
+    "fixado": true,
+    "tipo": "geral",
+    "setor": null
+  },
+  {
+    "id": 2,
+    "titulo": "Mudança no fluxo de conferência",
+    "tag": "Operação",
+    "resumo": "Novo procedimento para conferência de mercadorias.",
+    "conteudo": "A partir de amanhã, o processo de conferência de mercadorias passará a seguir uma nova sequência operacional.\n\nO objetivo é reduzir divergências, aumentar a rastreabilidade dos itens recebidos e melhorar o fluxo entre recebimento e abastecimento.\n\nOs supervisores devem alinhar o novo processo com suas equipes no início do turno.",
+    "data": "2025-09-09",
+    "novo": false,
+    "fixado": false,
+    "tipo": "geral",
+    "setor": null
+  },
+  {
+    "id": 6,
+    "titulo": "novo teste",
+    "tag": "deqe",
+    "resumo": "dwe",
+    "conteudo": "wd",
+    "data": "2026-04-11",
+    "novo": true,
+    "fixado": false,
+    "tipo": "geral",
+    "setor": null
+  }
+]

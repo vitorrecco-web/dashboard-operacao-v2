@@ -1,0 +1,256 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background: #081420;
+  color: #f5f7fa;
+}
+
+body {
+  min-height: 100vh;
+}
+
+.pagina {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.hero {
+  margin-bottom: 32px;
+}
+
+.topo-painel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  display: inline-block;
+  margin-bottom: 0;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #12324d;
+  color: #7dd3fc;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+.botao-admin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 12px;
+  border: 1px solid #29445b;
+  border-radius: 10px;
+  background: transparent;
+  color: #b8c4d1;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.botao-admin:hover {
+  background: #102132;
+  color: #f5f7fa;
+}
+
+.hero h1 {
+  margin: 0 0 12px;
+  font-size: 48px;
+}
+
+.hero p {
+  margin: 0;
+  max-width: 700px;
+  color: #b8c4d1;
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.setores {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.card-setor {
+  background: #102132;
+  border: 1px solid #1d3449;
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+}
+
+.card-topo {
+  margin-bottom: 18px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #12324d;
+  color: #7dd3fc;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.card-setor h2 {
+  margin: 0 0 12px;
+  font-size: 24px;
+}
+
+.card-setor p {
+  margin: 0 0 24px;
+  color: #b8c4d1;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  background: #19c2a0;
+  color: #04151f;
+  font-weight: bold;
+  text-decoration: none;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.botao:hover {
+  opacity: 0.9;
+}
+
+.voltar {
+  display: inline-flex;
+  align-items: center;
+  background: #2ad4b1;
+  color: #041a2b;
+  padding: 16px 26px;
+  border-radius: 18px;
+  font-weight: 700;
+  text-decoration: none;
+  margin-bottom: 28px;
+  transition: 0.2s;
+}
+
+.voltar:hover {
+  transform: translateY(-1px);
+}
+
+.formulario-area {
+  max-width: 800px;
+}
+
+.formulario-comunicado {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  background: #102132;
+  border: 1px solid #1d3449;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+}
+
+.formulario-comunicado label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #f5f7fa;
+  font-weight: 600;
+}
+
+.formulario-comunicado input,
+.formulario-comunicado textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #29445b;
+  background: #0b1a28;
+  color: #f5f7fa;
+  font-size: 15px;
+  outline: none;
+}
+
+.formulario-comunicado input::placeholder,
+.formulario-comunicado textarea::placeholder {
+  color: #8ea3b5;
+}
+
+.formulario-comunicado textarea {
+  resize: vertical;
+  min-height: 160px;
+}
+
+.checkbox-linha {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 10px !important;
+  font-weight: 500;
+}
+
+@media (max-width: 1000px) {
+  .setores {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .pagina {
+    padding: 32px 16px;
+  }
+
+  .hero h1 {
+    font-size: 36px;
+  }
+
+  .hero p {
+    font-size: 16px;
+  }
+
+  .setores {
+    grid-template-columns: 1fr;
+  }
+
+  .topo-painel {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  
+  .linha-dupla {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  
+  .checkbox-linha input[type="checkbox"] {
+    width: auto;
+  }
+  
+  @media (max-width: 640px) {
+    .linha-dupla {
+      grid-template-columns: 1fr;
+    }
+  }
+}

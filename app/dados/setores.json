@@ -1,0 +1,45 @@
+{
+  "picking": {
+    "nome": "Picking",
+    "area": "Mercearia",
+    "descricao": "Consulte arquivos fixados, mudanças de processo e materiais operacionais do setor de Picking.",
+    "arquivosFixados": [
+      {
+        "id": 1,
+        "nome": "POP - Picking atualizado",
+        "descricao": "Procedimento operacional padrão vigente do setor.",
+        "arquivo": "/arquivos/picking/teste.pdf",
+        "data": "2026-04-11",
+        "fixado": true
+      }
+    ],
+    "comunicados": [
+      {
+        "id": 1,
+        "titulo": "Mudança no fluxo de separação",
+        "tag": "Processo",
+        "resumo": "Novo fluxo para separação de pedidos da rota A.",
+        "conteudo": "A partir desta semana, o processo de separação da rota A passará a seguir uma nova sequência operacional. O objetivo é reduzir deslocamentos, melhorar a produtividade e padronizar a coleta dos pedidos.\n\nOs supervisores devem alinhar o novo fluxo com a equipe antes do início do turno.",
+        "data": "2026-04-11",
+        "novo": true,
+        "anexos": [
+          {
+            "id": 1,
+            "nome": "Fluxo atualizado",
+            "arquivo": "/arquivos/picking/teste.pdf"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "titulo": "Conferência obrigatória ao final do lote",
+        "tag": "Qualidade",
+        "resumo": "Conferência rápida obrigatória antes do envio do lote.",
+        "conteudo": "Todos os lotes finalizados deverão passar por conferência antes da liberação para a etapa seguinte. Essa ação visa reduzir erros de separação, melhorar a qualidade operacional e evitar retrabalho.",
+        "data": "2026-04-10",
+        "novo": false,
+        "anexos": []
+      }
+    ]
+  }
+}
