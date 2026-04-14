@@ -43,7 +43,14 @@ async function signValue(value: string) {
     new TextEncoder().encode(value)
   );
 
-  return base64UrlEncode(String.fromCharCode(...new Uint8Array(signature)));
+  const bytes = new Uint8Array(signature);
+  let binary = "";
+
+  for (let index = 0; index < bytes.length; index += 1) {
+    binary += String.fromCharCode(bytes[index]);
+  }
+
+  return base64UrlEncode(binary);
 }
 
 export async function createSessionToken(role: UserRole) {
