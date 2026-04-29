@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: painel-operacao-backend
+    runtime: node
+    rootDir: apps/backend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    plan: starter
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATA_DIR
+        value: /var/data
+    disks:
+      - name: painel-operacao-data
+        mountPath: /var/data
+        sizeGB: 5

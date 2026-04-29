@@ -1,29 +1,20 @@
 {
-  "name": "nextjs",
-  "version": "0.1.0",
+  "name": "painel-operacao-monorepo",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start -H 0.0.0.0",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.103.0",
-    "@types/node": "20.6.2",
-    "@types/react": "18.2.22",
-    "@types/react-dom": "18.2.7",
-    "autoprefixer": "10.4.15",
-    "better-sqlite3": "^12.9.0",
-    "eslint": "8.49.0",
-    "eslint-config-next": "13.5.1",
-    "googleapis": "^171.4.0",
-    "next": "13.5.1",
-    "next-auth": "^4.24.13",
-    "postcss": "8.4.30",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "tailwindcss": "3.3.3",
-    "typescript": "5.2.2"
+    "dev:local": "powershell -ExecutionPolicy Bypass -File scripts/dev-local.ps1",
+    "dev:frontend": "npm --prefix apps/frontend run dev",
+    "dev:backend": "npm --prefix apps/backend run dev",
+    "build:frontend": "npm --prefix apps/frontend run build",
+    "build:backend": "npm --prefix apps/backend run build",
+    "start:frontend": "npm --prefix apps/frontend run start",
+    "start:backend": "npm --prefix apps/backend run start",
+    "lint:frontend": "npm --prefix apps/frontend run lint",
+    "lint:backend": "npm --prefix apps/backend run lint",
+    "typecheck:frontend": "npx tsc --project apps/frontend/tsconfig.json --noEmit"
   }
 }

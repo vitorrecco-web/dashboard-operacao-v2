@@ -11,6 +11,9 @@
 # next.js
 /.next/
 /out/
+/apps/frontend/.next/
+/apps/backend/.next/
+/apps/backend/dist/
 
 # production
 /build
@@ -18,6 +21,16 @@
 /data/*.db-shm
 /data/*.db-wal
 /data/email-attachments/
+/apps/frontend/data/*.db
+/apps/frontend/data/*.db-shm
+/apps/frontend/data/*.db-wal
+/apps/frontend/data/comunicado-pdfs/
+/apps/frontend/data/email-attachments/
+/apps/backend/data/*.db
+/apps/backend/data/*.db-shm
+/apps/backend/data/*.db-wal
+/apps/backend/data/comunicado-pdfs/
+/apps/backend/data/email-attachments/
 
 # misc
 .DS_Store
@@ -37,3 +50,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+apps/frontend/next-env.d.ts

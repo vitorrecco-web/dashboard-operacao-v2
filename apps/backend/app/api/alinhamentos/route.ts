@@ -1,0 +1,66 @@
+import { NextRequest, NextResponse } from "next/server";
+import { AUTH_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
+import {
+  getMeetingTopicsByDestination,
+  saveMeetingTopicsByDestination,
+} from "@/lib/meeting-topics";
+
+async function getAdminSession(req: NextRequest) {
+  const token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
+  const session = await verifySessionToken(token);
+
+  if (!session || session.role !== "admin") {
+    return null;
+  }
+
+  return session;
+}
+
+export async function GET(req: NextRequest) {
+  const session = await getAdminSession(req);
+
+  if (!session) {
+    return NextResponse.json({ erro: "Acesso negado." }, { status: 403 });
+  }
+
+  const destinationKey = req.nextUrl.searchParams.get("dest") ?? "geral";
+
+  return NextResponse.json({
+    topics: getMeetingTopicsByDestination(destinationKey),
+    destinationKey,
+  });
+}
+
+export async function PUT(req: NextRequest) {
+  try {
+    const session = await getAdminSession(req);
+
+    if (!session) {
+      return NextResponse.json({ erro: "Acesso negado." }, { status: 403 });
+    }
+
+    const body = (await req.json()) as { topics?: unknown; destinationKey?: unknown };
+    const destinationKey =
+      typeof body.destinationKey === "string" && body.destinationKey.trim()
+        ? body.destinationKey.trim()
+        : "geral";
+    const rawTopics = Array.isArray(body.topics) ? body.topics : [];
+    const topics = rawTopics.filter((item): item is string => typeof item === "string");
+
+    const savedTopics = saveMeetingTopicsByDestination(destinationKey, topics);
+
+    return NextResponse.json({
+      sucesso: true,
+      destinationKey,
+      topics: savedTopics,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        erro: "Nao foi possivel salvar os alinhamentos.",
+        detalhe: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
+  }
+}
