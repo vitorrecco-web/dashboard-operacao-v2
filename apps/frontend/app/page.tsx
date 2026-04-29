@@ -1,8 +1,8 @@
 import Link from "next/link";
 import AdminPreviewSelector from "@/components/admin-preview-selector";
+import MeetingTopicsList from "@/components/meeting-topics-list";
 import LogoutButton from "@/components/logout-button";
 import { getComunicadoDestinationByKey, getAllComunicadoDestinations } from "@/lib/comunicado-destinations";
-import { getMeetingTopicsForSector } from "@/lib/meeting-topics";
 import { getSession } from "@/lib/server-session";
 import { getSectorDefinition } from "@/lib/sector-config";
 
@@ -23,7 +23,7 @@ type DashboardPreview = {
   sectorName: string | null;
   areaName: string | null;
   homePath: string;
-  meetingTopics: string[];
+  destinationKey: string;
   badgeLabel: string;
   previewKey?: string | null;
 };
@@ -43,11 +43,7 @@ function SupervisorDashboard({ preview }: { preview: DashboardPreview }) {
           encontro com a operacao.
         </p>
 
-        <ul className="lista-alinhamentos">
-          {preview.meetingTopics.map((topic) => (
-            <li key={topic}>{topic}</li>
-          ))}
-        </ul>
+        <MeetingTopicsList destinationKey={preview.destinationKey} />
       </article>
 
       <div className="cards-secundarios">
@@ -126,10 +122,7 @@ export default async function Home({
           sectorName: previewSector.sectorNome,
           areaName: previewSector.areaNome,
           homePath: `/area/${previewSector.areaKey}/${previewSector.sectorKey}`,
-          meetingTopics: getMeetingTopicsForSector(
-            previewSector.areaKey,
-            previewSector.sectorKey
-          ),
+          destinationKey: previewSector.setorId,
           badgeLabel: `${previewSector.areaNome} - ${previewSector.sectorNome}`,
           previewKey: previewSector.setorId,
         }
@@ -138,10 +131,10 @@ export default async function Home({
           sectorName: session.sectorName,
           areaName: session.areaName,
           homePath: session.homePath,
-          meetingTopics: getMeetingTopicsForSector(
-            session.allowedArea,
-            session.allowedSector
-          ),
+          destinationKey:
+            session.allowedArea && session.allowedSector
+              ? `${session.allowedArea}-${session.allowedSector}`
+              : "geral",
           badgeLabel: session.displayName,
           previewKey: null,
         };
