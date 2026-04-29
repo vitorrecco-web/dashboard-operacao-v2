@@ -94,9 +94,34 @@ type EmailAttachmentRow = {
   size: number;
 };
 
-export const dataDir = process.env.DATA_DIR
-  ? path.resolve(process.env.DATA_DIR)
-  : path.join(process.cwd(), "data");
+function resolveWritableDataDir() {
+  const candidates = [
+    process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : null,
+    path.join(process.cwd(), "data"),
+  ].filter((value): value is string => Boolean(value));
+
+  for (const candidate of candidates) {
+    try {
+      if (!fs.existsSync(candidate)) {
+        fs.mkdirSync(candidate, { recursive: true });
+      }
+
+      const probePath = path.join(candidate, ".write-test");
+      fs.writeFileSync(probePath, "ok");
+      fs.unlinkSync(probePath);
+
+      return candidate;
+    } catch {
+      continue;
+    }
+  }
+
+  throw new Error(
+    "Nao foi possivel acessar um diretorio gravavel para os dados da aplicacao."
+  );
+}
+
+export const dataDir = resolveWritableDataDir();
 const dbPath = path.join(dataDir, "painel.db");
 const geraisJsonPath = path.join(process.cwd(), "app", "dados", "comunicados.json");
 const pickingJsonPath = path.join(

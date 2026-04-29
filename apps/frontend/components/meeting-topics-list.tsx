@@ -9,6 +9,7 @@ export default function MeetingTopicsList({
 }) {
   const [topics, setTopics] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -16,6 +17,7 @@ export default function MeetingTopicsList({
     async function loadTopics() {
       try {
         setLoading(true);
+        setError("");
         const response = await fetch(
           `/api/alinhamentos?dest=${encodeURIComponent(destinationKey)}`,
           {
@@ -28,6 +30,12 @@ export default function MeetingTopicsList({
           return;
         }
 
+        if (!response.ok) {
+          setTopics([]);
+          setError(data?.erro || "Nao foi possivel carregar os alinhamentos.");
+          return;
+        }
+
         setTopics(Array.isArray(data?.topics) ? data.topics : []);
       } catch {
         if (!active) {
@@ -35,6 +43,7 @@ export default function MeetingTopicsList({
         }
 
         setTopics([]);
+        setError("Nao foi possivel carregar os alinhamentos.");
       } finally {
         if (active) {
           setLoading(false);
@@ -56,7 +65,7 @@ export default function MeetingTopicsList({
   if (topics.length === 0) {
     return (
       <p style={{ marginTop: "24px", color: "#d5e4f0" }}>
-        Nenhum alinhamento cadastrado para este painel ainda.
+        {error || "Nenhum alinhamento cadastrado para este painel ainda."}
       </p>
     );
   }
