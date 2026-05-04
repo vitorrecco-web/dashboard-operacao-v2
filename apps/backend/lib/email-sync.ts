@@ -20,7 +20,10 @@ import {
 } from "@/lib/comunicados-db";
 
 const MAILBOX = process.env.SUPERVISAO_EMAIL || "supervisao@shopper.com.br";
-const GMAIL_SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"];
+const GOOGLE_SCOPES = [
+  "https://www.googleapis.com/auth/gmail.readonly",
+  "https://www.googleapis.com/auth/drive.readonly",
+];
 const EMAIL_SYNC_INTERVAL_MINUTES = Number(process.env.EMAIL_SYNC_INTERVAL_MINUTES || "5");
 const EMAIL_SYNC_LOCK_KEY = "emails_sync";
 const EMAIL_SYNC_LOCK_TTL_SECONDS = 60 * 4;
@@ -294,7 +297,7 @@ export function getOAuthAuthorizationUrl() {
     access_type: "offline",
     include_granted_scopes: true,
     prompt: "consent",
-    scope: GMAIL_SCOPES,
+    scope: GOOGLE_SCOPES,
     login_hint: MAILBOX,
   });
 }

@@ -15,7 +15,6 @@ export default function AdminSectorFormPage({
   const [tag, setTag] = useState("");
   const [resumo, setResumo] = useState("");
   const [conteudo, setConteudo] = useState("");
-  const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [carregando, setCarregando] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -35,10 +34,6 @@ export default function AdminSectorFormPage({
       formData.append("resumo", resumo);
       formData.append("conteudo", conteudo);
       formData.append("data", new Date().toISOString().split("T")[0]);
-
-      if (pdfFile) {
-        formData.append("pdf", pdfFile);
-      }
 
       const resposta = await fetch(
         `/api/setor-comunicados/${sector.areaKey}/${sector.sectorKey}`,
@@ -206,29 +201,21 @@ export default function AdminSectorFormPage({
             />
           </div>
 
-          <div>
-            <label htmlFor="pdf" style={{ display: "block", marginBottom: "10px", fontWeight: 700, fontSize: "16px" }}>
-              PDF do comunicado
-            </label>
-            <input
-              id="pdf"
-              type="file"
-              accept="application/pdf,.pdf"
-              onChange={(e) => setPdfFile(e.target.files?.[0] ?? null)}
-              style={{
-                width: "100%",
-                padding: "16px",
-                borderRadius: "16px",
-                border: "1px solid rgba(125, 211, 252, 0.15)",
-                background: "#071d33",
-                color: "#fff",
-                fontSize: "16px",
-                outline: "none",
-              }}
-            />
-            <p style={{ margin: "10px 0 0", color: "#b8c4d1", fontSize: "14px" }}>
-              Anexe um PDF opcional para aparecer no painel do setor.
-            </p>
+          <div
+            style={{
+              padding: "18px",
+              borderRadius: "16px",
+              border: "1px solid rgba(125, 211, 252, 0.15)",
+              background: "#071d33",
+              color: "#d7e0ea",
+            }}
+          >
+            <strong style={{ display: "block", marginBottom: "8px", color: "#f5f7fa" }}>
+              PDFs do setor
+            </strong>
+            Os documentos em PDF agora sao lidos da pasta do Google Drive deste setor.
+            Para exibir novos arquivos no painel, adicione o PDF diretamente na pasta
+            {` ${sector.areaNome} - ${sector.sectorNome}`} no Drive.
           </div>
 
           <button
