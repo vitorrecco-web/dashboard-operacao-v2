@@ -24,9 +24,51 @@ type SectorDriveDocument = {
   openUrl: string;
 };
 
+function PdfFolderIcon() {
+  return (
+    <svg
+      width="52"
+      height="52"
+      viewBox="0 0 52 52"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <rect x="6" y="12" width="40" height="28" rx="8" fill="#15314A" />
+      <path
+        d="M14 16.5H23.5L27 20H38C39.6569 20 41 21.3431 41 23V34C41 35.6569 39.6569 37 38 37H14C12.3431 37 11 35.6569 11 34V19.5C11 17.8431 12.3431 16.5 14 16.5Z"
+        fill="#1FC9B2"
+      />
+      <rect x="16" y="24" width="20" height="10" rx="3" fill="#0B1A28" />
+      <path
+        d="M20.4 31V26.8H22.57C23.61 26.8 24.26 27.38 24.26 28.34C24.26 29.31 23.61 29.89 22.57 29.89H21.56V31H20.4ZM21.56 28.98H22.33C22.8 28.98 23.08 28.76 23.08 28.34C23.08 27.93 22.8 27.71 22.33 27.71H21.56V28.98Z"
+        fill="#F5F7FA"
+      />
+      <path
+        d="M25.06 31V26.8H26.9C28.18 26.8 29.03 27.61 29.03 28.9C29.03 30.19 28.18 31 26.9 31H25.06ZM26.22 30.03H26.76C27.42 30.03 27.84 29.61 27.84 28.9C27.84 28.19 27.42 27.77 26.76 27.77H26.22V30.03Z"
+        fill="#F5F7FA"
+      />
+      <path
+        d="M29.96 31V26.8H33.08V27.75H31.12V28.51H32.85V29.42H31.12V31H29.96Z"
+        fill="#F5F7FA"
+      />
+    </svg>
+  );
+}
+
 function formatarData(data: string) {
   const [ano, mes, dia] = data.split("-");
   return `${dia}/${mes}/${ano}`;
+}
+
+function abreviarNomeDocumento(nome: string) {
+  const semExtensao = nome.replace(/\.pdf$/i, "").replace(/\.docx$/i, "");
+
+  if (semExtensao.length <= 28) {
+    return semExtensao;
+  }
+
+  return `${semExtensao.slice(0, 25)}...`;
 }
 
 export default function SectorOperationalPage({
@@ -143,7 +185,7 @@ export default function SectorOperationalPage({
         <div style={{ marginBottom: "18px" }}>
           <span className="badge">PDFS DO SETOR</span>
           <h2 style={{ marginTop: "12px", marginBottom: "6px", color: "#f5f7fa" }}>
-            Documentos da pasta {sector.areaNome} - {sector.sectorNome}
+            DOCUMENTOS - {sector.sectorNome.toUpperCase()}
           </h2>
           <p style={{ margin: 0, color: "#d7e0ea", lineHeight: 1.6 }}>
             Esta lista mostra somente os PDFs cadastrados na pasta deste setor no Google Drive.
@@ -177,59 +219,78 @@ export default function SectorOperationalPage({
             Nenhum PDF encontrado para este setor ainda.
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+              gap: "14px",
+            }}
+          >
             {documents.map((item) => (
-              <article
+              <a
                 key={item.id}
+                href={item.openUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
                   background: "#0b1a28",
                   border: "1px solid #1d3449",
                   borderRadius: "16px",
-                  padding: "16px 18px",
+                  padding: "18px 14px 16px",
                   display: "flex",
-                  justifyContent: "space-between",
+                  flexDirection: "column",
                   alignItems: "center",
-                  gap: "16px",
-                  flexWrap: "wrap",
+                  justifyContent: "flex-start",
+                  gap: "10px",
+                  minHeight: "168px",
+                  textDecoration: "none",
+                  color: "inherit",
                 }}
               >
-                <div style={{ minWidth: "220px", flex: 1 }}>
+                <div
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    minHeight: "64px",
+                  }}
+                >
+                  <PdfFolderIcon />
+                </div>
+                <div
+                  style={{
+                    display: "grid",
+                    gap: "6px",
+                    width: "100%",
+                    textAlign: "center",
+                  }}
+                >
                   <h3
                     style={{
-                      margin: "0 0 8px",
+                      margin: 0,
                       color: "#f5f7fa",
-                      fontSize: "20px",
-                      lineHeight: 1.3,
+                      fontSize: "13px",
+                      lineHeight: 1.35,
+                      fontWeight: 700,
+                      textTransform: "uppercase",
                     }}
+                    title={item.name}
                   >
-                    {item.name}
+                    {abreviarNomeDocumento(item.name)}
                   </h3>
                   <div
                     style={{
-                      display: "flex",
-                      gap: "12px",
-                      flexWrap: "wrap",
                       color: "#9fb3c8",
-                      fontSize: "14px",
+                      fontSize: "12px",
+                      lineHeight: 1.4,
                     }}
                   >
-                    <span>Atualizado em {formatarDataHora(item.modifiedTime)}</span>
-                    {formatarTamanho(item.size) ? (
-                      <span>{formatarTamanho(item.size)}</span>
-                    ) : null}
+                    <div>{formatarDataHora(item.modifiedTime)}</div>
+                    {formatarTamanho(item.size) ? <div>{formatarTamanho(item.size)}</div> : null}
                   </div>
                 </div>
-
-                <a
-                  href={item.openUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="botao"
-                  style={{ textDecoration: "none" }}
-                >
-                  Abrir PDF
-                </a>
-              </article>
+              </a>
             ))}
           </div>
         )}
