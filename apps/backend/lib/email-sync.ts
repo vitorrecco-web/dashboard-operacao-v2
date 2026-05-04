@@ -23,6 +23,7 @@ const MAILBOX = process.env.SUPERVISAO_EMAIL || "supervisao@shopper.com.br";
 const GOOGLE_SCOPES = [
   "https://www.googleapis.com/auth/gmail.readonly",
   "https://www.googleapis.com/auth/drive.readonly",
+  "https://www.googleapis.com/auth/spreadsheets.readonly",
 ];
 const EMAIL_SYNC_INTERVAL_MINUTES = Number(process.env.EMAIL_SYNC_INTERVAL_MINUTES || "5");
 const EMAIL_SYNC_LOCK_KEY = "emails_sync";

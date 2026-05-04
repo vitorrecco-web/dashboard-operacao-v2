@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AdminPreviewSelector from "@/components/admin-preview-selector";
+import KpiSummaryCard from "@/components/kpi-summary-card";
 import MeetingTopicsList from "@/components/meeting-topics-list";
 import LogoutButton from "@/components/logout-button";
 import { getComunicadoDestinationByKey, getAllComunicadoDestinations } from "@/lib/comunicado-destinations";
@@ -85,6 +86,12 @@ function SupervisorDashboard({ preview }: { preview: DashboardPreview }) {
             Abrir {preview.sectorName}
           </Link>
         </article>
+
+        <KpiSummaryCard
+          areaKey={preview.homePath ? preview.destinationKey.split("-")[0] ?? null : null}
+          sectorKey={preview.homePath ? preview.destinationKey.split("-").slice(1).join("-") || null : null}
+          sectorName={preview.sectorName}
+        />
       </div>
     </section>
   );
