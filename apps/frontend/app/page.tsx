@@ -32,6 +32,14 @@ type DashboardPreview = {
 function SupervisorDashboard({ preview }: { preview: DashboardPreview }) {
   return (
     <section className="dashboard-supervisor">
+      <KpiSummaryCard
+        areaKey={preview.homePath ? preview.destinationKey.split("-")[0] ?? null : null}
+        sectorKey={preview.homePath ? preview.destinationKey.split("-").slice(1).join("-") || null : null}
+        sectorName={preview.sectorName}
+        badgeLabel={preview.badgeLabel}
+        variant="hero"
+      />
+
       <article className="card-destaque">
         <div className="card-topo">
           <span className="badge">ALINHAMENTOS</span>
@@ -45,6 +53,12 @@ function SupervisorDashboard({ preview }: { preview: DashboardPreview }) {
         </p>
 
         <MeetingTopicsList destinationKey={preview.destinationKey} />
+        <KpiSummaryCard
+          areaKey={preview.homePath ? preview.destinationKey.split("-")[0] ?? null : null}
+          sectorKey={preview.homePath ? preview.destinationKey.split("-").slice(1).join("-") || null : null}
+          sectorName={preview.sectorName}
+          variant="inline"
+        />
       </article>
 
       <div className="cards-secundarios">
@@ -86,12 +100,6 @@ function SupervisorDashboard({ preview }: { preview: DashboardPreview }) {
             Abrir {preview.sectorName}
           </Link>
         </article>
-
-        <KpiSummaryCard
-          areaKey={preview.homePath ? preview.destinationKey.split("-")[0] ?? null : null}
-          sectorKey={preview.homePath ? preview.destinationKey.split("-").slice(1).join("-") || null : null}
-          sectorName={preview.sectorName}
-        />
       </div>
     </section>
   );
