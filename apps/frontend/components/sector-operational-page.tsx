@@ -222,8 +222,8 @@ export default function SectorOperationalPage({
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-              gap: "14px",
+              gridTemplateColumns: "repeat(auto-fit, minmax(118px, 132px))",
+              gap: "18px 16px",
             }}
           >
             {documents.map((item) => (
@@ -233,35 +233,22 @@ export default function SectorOperationalPage({
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
-                  background: "#0b1a28",
-                  border: "1px solid #1d3449",
-                  borderRadius: "16px",
-                  padding: "18px 14px 16px",
+                  padding: "8px 6px",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "flex-start",
-                  gap: "10px",
-                  minHeight: "168px",
+                  gap: "8px",
+                  minHeight: "unset",
                   textDecoration: "none",
                   color: "inherit",
                 }}
               >
-                <div
-                  style={{
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    minHeight: "64px",
-                  }}
-                >
-                  <PdfFolderIcon />
-                </div>
+                <PdfFolderIcon />
                 <div
                   style={{
                     display: "grid",
-                    gap: "6px",
+                    gap: "4px",
                     width: "100%",
                     textAlign: "center",
                   }}
@@ -270,7 +257,7 @@ export default function SectorOperationalPage({
                     style={{
                       margin: 0,
                       color: "#f5f7fa",
-                      fontSize: "13px",
+                      fontSize: "12px",
                       lineHeight: 1.35,
                       fontWeight: 700,
                       textTransform: "uppercase",
@@ -282,7 +269,7 @@ export default function SectorOperationalPage({
                   <div
                     style={{
                       color: "#9fb3c8",
-                      fontSize: "12px",
+                      fontSize: "11px",
                       lineHeight: 1.4,
                     }}
                   >
