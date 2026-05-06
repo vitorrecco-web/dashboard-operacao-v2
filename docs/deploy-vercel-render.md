@@ -40,8 +40,10 @@ DATA_DIR=/var/data
 SUPERVISAO_EMAIL=supervisao@shopper.com.br
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
+GOOGLE_REFRESH_TOKEN=
 GOOGLE_REDIRECT_URI=https://SEU-BACKEND.onrender.com/api/emails/oauth/callback
 EMAIL_CRON_TOKEN=
+GOOGLE_CACHE_CRON_TOKEN=
 FRONTEND_URL=https://SEU-FRONTEND.vercel.app
 ```
 
@@ -53,9 +55,11 @@ FRONTEND_URL=https://SEU-FRONTEND.vercel.app
 4. Validar login e comunicados
 5. Configurar o OAuth do Gmail com `GOOGLE_REDIRECT_URI` do backend
 6. Testar sincronizacao de e-mails
+7. Configurar um cron HTTP para `GET /api/google-cache/cron` a cada 60 minutos
 
 ## Observacoes
 
 - `AUTH_SECRET` deve ser exatamente o mesmo no frontend e no backend
+- `GOOGLE_REFRESH_TOKEN` deve estar persistido no ambiente do backend para KPIs e PDFs funcionarem sem reconectar Gmail
 - o backend deve manter disco persistente para SQLite e anexos
 - o callback do Gmail volta para o frontend usando `FRONTEND_URL`

@@ -117,6 +117,10 @@ export function getSectorsByArea(areaKey: string) {
   return sectorDefinitions.filter((item) => item.areaKey === areaKey);
 }
 
+export function getAllSectorDefinitions() {
+  return sectorDefinitions;
+}
+
 export function getSectorDefinition(areaKey: string, sectorKey: string) {
   return sectorDefinitions.find(
     (item) => item.areaKey === areaKey && item.sectorKey === sectorKey

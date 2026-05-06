@@ -8,6 +8,7 @@ function isPublicApiPath(pathname: string) {
     pathname === "/api/logout" ||
     pathname.startsWith("/api/auth") ||
     pathname === "/api/emails/cron" ||
+    pathname === "/api/google-cache/cron" ||
     pathname === "/api/emails/oauth/callback"
   );
 }
