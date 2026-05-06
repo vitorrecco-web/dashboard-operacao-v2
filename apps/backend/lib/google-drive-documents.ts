@@ -102,7 +102,7 @@ function getAuthorizedDriveClient() {
   const clientId = getRequiredEnv("GOOGLE_CLIENT_ID");
   const clientSecret = getRequiredEnv("GOOGLE_CLIENT_SECRET");
   const refreshToken =
-    process.env.GOOGLE_REFRESH_TOKEN || getAppSetting("google_refresh_token");
+    getAppSetting("google_refresh_token") || process.env.GOOGLE_REFRESH_TOKEN;
 
   if (!refreshToken) {
     throw new Error("Refresh token do Google ainda nao configurado.");

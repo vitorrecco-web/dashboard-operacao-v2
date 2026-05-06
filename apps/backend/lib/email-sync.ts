@@ -64,6 +64,10 @@ function getRedirectUri() {
   );
 }
 
+function getGoogleRefreshToken() {
+  return getAppSetting("google_refresh_token") || process.env.GOOGLE_REFRESH_TOKEN;
+}
+
 function decodeBase64Url(value?: string | null) {
   if (!value) {
     return "";
@@ -241,8 +245,7 @@ function collectAttachmentParts(payload?: GmailPart | null) {
 function getOAuthClient() {
   const clientId = getRequiredEnv("GOOGLE_CLIENT_ID");
   const clientSecret = getRequiredEnv("GOOGLE_CLIENT_SECRET");
-  const refreshToken =
-    process.env.GOOGLE_REFRESH_TOKEN || getAppSetting("google_refresh_token");
+  const refreshToken = getGoogleRefreshToken();
 
   if (!refreshToken) {
     throw new Error("Refresh token do Gmail ainda nao configurado.");
@@ -264,7 +267,7 @@ export function getEmailSyncStatus() {
     Boolean(process.env.GOOGLE_CLIENT_SECRET);
   const configured =
     hasClientCredentials &&
-    Boolean(process.env.GOOGLE_REFRESH_TOKEN || getAppSetting("google_refresh_token"));
+    Boolean(getGoogleRefreshToken());
   const lastSyncAt = getAppSetting("emails_last_sync_at");
   const oauthIssue = getAppSetting("gmail_oauth_issue");
   const connectedAt = getAppSetting("gmail_connected_at");
@@ -275,9 +278,7 @@ export function getEmailSyncStatus() {
     configured,
     hasClientCredentials,
     redirectUri: getRedirectUri(),
-    hasRefreshToken: Boolean(
-      process.env.GOOGLE_REFRESH_TOKEN || getAppSetting("google_refresh_token")
-    ),
+    hasRefreshToken: Boolean(getGoogleRefreshToken()),
     lastSyncAt,
     oauthIssue,
     connectedAt,
