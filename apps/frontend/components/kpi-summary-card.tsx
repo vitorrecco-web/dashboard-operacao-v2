@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useAutoRefresh } from "@/components/use-auto-refresh";
 
 type KpiRecord = {
   label: string;
@@ -14,10 +15,11 @@ type KpiResponse = {
   total: number;
 };
 
+const KPI_REFRESH_INTERVAL_MS = 30000;
+
 export default function KpiSummaryCard({
   areaKey,
   sectorKey,
-  sectorName,
   variant = "card",
   badgeLabel,
 }: {
@@ -29,44 +31,76 @@ export default function KpiSummaryCard({
 }) {
   const [data, setData] = useState<KpiResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
-    async function loadKpis() {
-      if (!areaKey || !sectorKey) {
+    hasLoadedRef.current = false;
+    setData(null);
+    setLoading(true);
+  }, [areaKey, sectorKey]);
+
+  const loadKpis = useCallback(async () => {
+    if (!areaKey || !sectorKey) {
+      setData({
+        configured: false,
+        reason: "Nenhum setor foi configurado para este painel.",
+        items: [],
+        total: 0,
+      });
+      hasLoadedRef.current = true;
+      setLoading(false);
+      return;
+    }
+
+    try {
+      if (!hasLoadedRef.current) {
+        setLoading(true);
+      }
+
+      const response = await fetch(
+        `/api/kpis?area=${encodeURIComponent(areaKey)}&setor=${encodeURIComponent(sectorKey)}&limit=8`,
+        {
+          cache: "no-store",
+        }
+      );
+      const payload = (await response.json()) as Partial<KpiResponse> & {
+        erro?: string;
+      };
+      const items = Array.isArray(payload.items) ? payload.items : [];
+
+      if (!response.ok) {
         setData({
-          configured: false,
-          reason: "Nenhum setor foi configurado para este painel.",
+          configured: payload.configured ?? true,
+          reason:
+            payload.reason ??
+            payload.erro ??
+            "Nao foi possivel consultar os KPIs da planilha agora.",
           items: [],
           total: 0,
         });
-        setLoading(false);
         return;
       }
 
-      try {
-        setLoading(true);
-        const response = await fetch(
-          `/api/kpis?area=${encodeURIComponent(areaKey)}&setor=${encodeURIComponent(sectorKey)}&limit=8`,
-          {
-            cache: "no-store",
-          }
-        );
-        const payload = (await response.json()) as KpiResponse;
-        setData(payload);
-      } catch {
-        setData({
-          configured: true,
-          reason: "Nao foi possivel consultar os KPIs da planilha agora.",
-          items: [],
-          total: 0,
-        });
-      } finally {
-        setLoading(false);
-      }
+      setData({
+        configured: payload.configured ?? true,
+        reason: payload.reason ?? null,
+        items,
+        total: typeof payload.total === "number" ? payload.total : items.length,
+      });
+    } catch {
+      setData({
+        configured: true,
+        reason: "Nao foi possivel consultar os KPIs da planilha agora.",
+        items: [],
+        total: 0,
+      });
+    } finally {
+      hasLoadedRef.current = true;
+      setLoading(false);
     }
-
-    loadKpis();
   }, [areaKey, sectorKey]);
+
+  useAutoRefresh(loadKpis, { intervalMs: KPI_REFRESH_INTERVAL_MS });
 
   if (variant === "inline") {
     return (
@@ -82,7 +116,7 @@ export default function KpiSummaryCard({
         >
           <span className="badge">KPIS</span>
           <strong style={{ color: "#eef7ff", fontSize: "14px" }}>
-            Indicadores - {sectorName}
+            Indicadores operacao
           </strong>
         </div>
 
@@ -209,7 +243,7 @@ export default function KpiSummaryCard({
           {badgeLabel ? <span className="perfil-chip">{badgeLabel}</span> : null}
         </div>
 
-        <h2>Indicadores - {sectorName}</h2>
+        <h2>Indicadores operacao</h2>
         <p>
           Consulte os indicadores operacionais lidos automaticamente da planilha de KPIs.
         </p>
@@ -243,78 +277,47 @@ export default function KpiSummaryCard({
           <div
             style={{
               marginTop: "24px",
-              overflowX: "auto",
-              borderRadius: "18px",
-              border: "1px solid rgba(125, 211, 252, 0.16)",
-              background: "rgba(8, 20, 32, 0.42)",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+              gap: "14px",
             }}
           >
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                minWidth: "520px",
-              }}
-            >
-              <thead>
-                <tr>
-                  <th
-                    style={{
-                      textAlign: "left",
-                      padding: "14px 18px",
-                      color: "#7dd3fc",
-                      fontSize: "12px",
-                      letterSpacing: "0.4px",
-                      borderBottom: "1px solid rgba(125, 211, 252, 0.14)",
-                    }}
-                  >
-                    Indicador
-                  </th>
-                  <th
-                    style={{
-                      textAlign: "right",
-                      padding: "14px 18px",
-                      color: "#7dd3fc",
-                      fontSize: "12px",
-                      letterSpacing: "0.4px",
-                      borderBottom: "1px solid rgba(125, 211, 252, 0.14)",
-                    }}
-                  >
-                    Valor
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.items.map((item) => (
-                  <tr key={item.label}>
-                    <td
-                      style={{
-                        padding: "16px 18px",
-                        color: "#eef7ff",
-                        fontSize: "15px",
-                        lineHeight: 1.45,
-                        borderBottom: "1px solid rgba(125, 211, 252, 0.08)",
-                      }}
-                    >
-                      {item.label}
-                    </td>
-                    <td
-                      style={{
-                        padding: "16px 18px",
-                        color: "#eef7ff",
-                        fontSize: "16px",
-                        fontWeight: 700,
-                        textAlign: "right",
-                        whiteSpace: "nowrap",
-                        borderBottom: "1px solid rgba(125, 211, 252, 0.08)",
-                      }}
-                    >
-                      {item.value}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            {data.items.map((item) => (
+              <div
+                key={item.label}
+                style={{
+                  borderRadius: "18px",
+                  border: "1px solid rgba(125, 211, 252, 0.16)",
+                  background: "rgba(8, 20, 32, 0.42)",
+                  padding: "16px 18px",
+                  minHeight: "118px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  gap: "10px",
+                }}
+              >
+                <span
+                  style={{
+                    color: "#d7e0ea",
+                    fontSize: "14px",
+                    lineHeight: 1.45,
+                  }}
+                >
+                  {item.label}
+                </span>
+                <strong
+                  style={{
+                    color: "#eef7ff",
+                    fontSize: "28px",
+                    lineHeight: 1,
+                    letterSpacing: "-0.02em",
+                  }}
+                >
+                  {item.value}
+                </strong>
+              </div>
+            ))}
           </div>
         ) : (
           <div
@@ -339,7 +342,7 @@ export default function KpiSummaryCard({
         <span className="badge">KPIS</span>
       </div>
 
-      <h2>Indicadores - {sectorName}</h2>
+      <h2>Indicadores operacao</h2>
       <p>
         Consulte os indicadores operacionais lidos automaticamente da planilha de KPIs.
       </p>

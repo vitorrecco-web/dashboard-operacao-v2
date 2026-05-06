@@ -43,7 +43,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.json({ erro: "Sessao invalida." }, { status: 401 });
   }
 
-  if (pathname.startsWith("/api/alinhamentos") && session.role !== "admin") {
+  if (
+    pathname.startsWith("/api/alinhamentos") &&
+    req.method !== "GET" &&
+    session.role !== "admin"
+  ) {
     return NextResponse.json({ erro: "Acesso negado." }, { status: 403 });
   }
 

@@ -4,6 +4,10 @@ import { listSectorDriveDocuments } from "@/lib/google-drive-documents";
 import { getSectorDefinition } from "@/lib/sector-config";
 import { canAccessSector } from "@/lib/user-access";
 
+const NO_STORE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate",
+};
+
 type Props = {
   params: {
     area: string;
@@ -54,14 +58,17 @@ export async function GET(req: NextRequest, { params }: Props) {
   try {
     const result = await listSectorDriveDocuments(sector);
 
-    return NextResponse.json({
-      documents: result.documents.map((item) => ({
-        ...item,
-        openUrl: `/api/setor-documentos/${params.area}/${params.setor}/arquivo?fileId=${encodeURIComponent(item.id)}`,
-      })),
-      configured: result.configured,
-      reason: result.reason,
-    });
+    return NextResponse.json(
+      {
+        documents: result.documents.map((item) => ({
+          ...item,
+          openUrl: `/api/setor-documentos/${params.area}/${params.setor}/arquivo?fileId=${encodeURIComponent(item.id)}`,
+        })),
+        configured: result.configured,
+        reason: result.reason,
+      },
+      { headers: NO_STORE_HEADERS }
+    );
   } catch (error) {
     return NextResponse.json(
       {
@@ -72,7 +79,7 @@ export async function GET(req: NextRequest, { params }: Props) {
             ? error.message
             : "Nao foi possivel consultar os documentos do setor no Google Drive.",
       },
-      { status: 500 }
+      { status: 500, headers: NO_STORE_HEADERS }
     );
   }
 }

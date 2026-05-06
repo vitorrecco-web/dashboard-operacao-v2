@@ -53,12 +53,6 @@ function SupervisorDashboard({ preview }: { preview: DashboardPreview }) {
         </p>
 
         <MeetingTopicsList destinationKey={preview.destinationKey} />
-        <KpiSummaryCard
-          areaKey={preview.homePath ? preview.destinationKey.split("-")[0] ?? null : null}
-          sectorKey={preview.homePath ? preview.destinationKey.split("-").slice(1).join("-") || null : null}
-          sectorName={preview.sectorName}
-          variant="inline"
-        />
       </article>
 
       <div className="cards-secundarios">

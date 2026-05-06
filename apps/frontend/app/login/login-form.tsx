@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
-  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,8 +40,9 @@ export default function LoginForm() {
         return;
       }
 
-      router.push(data.redirectTo ?? (data.role === "admin" ? "/admin" : "/"));
-      router.refresh();
+      window.location.assign(
+        data.redirectTo ?? (data.role === "admin" ? "/admin" : "/")
+      );
     } catch {
       setError("Nao foi possivel entrar.");
     } finally {

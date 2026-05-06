@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useAutoRefresh } from "@/components/use-auto-refresh";
+
+const TOPICS_REFRESH_INTERVAL_MS = 30000;
 
 export default function MeetingTopicsList({
   destinationKey,
@@ -10,53 +13,54 @@ export default function MeetingTopicsList({
   const [topics, setTopics] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
-    let active = true;
-
-    async function loadTopics() {
-      try {
-        setLoading(true);
-        setError("");
-        const response = await fetch(
-          `/api/alinhamentos?dest=${encodeURIComponent(destinationKey)}`,
-          {
-            cache: "no-store",
-          }
-        );
-        const data = await response.json();
-
-        if (!active) {
-          return;
-        }
-
-        if (!response.ok) {
-          setTopics([]);
-          setError(data?.erro || "Nao foi possivel carregar os alinhamentos.");
-          return;
-        }
-
-        setTopics(Array.isArray(data?.topics) ? data.topics : []);
-      } catch {
-        if (!active) {
-          return;
-        }
-
-        setTopics([]);
-        setError("Nao foi possivel carregar os alinhamentos.");
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
-      }
-    }
-
-    loadTopics();
-
-    return () => {
-      active = false;
-    };
+    hasLoadedRef.current = false;
+    setTopics([]);
+    setError("");
+    setLoading(true);
   }, [destinationKey]);
+
+  const loadTopics = useCallback(async () => {
+    try {
+      if (!hasLoadedRef.current) {
+        setLoading(true);
+      }
+
+      setError("");
+      const response = await fetch(
+        `/api/alinhamentos?dest=${encodeURIComponent(destinationKey)}`,
+        {
+          cache: "no-store",
+        }
+      );
+      const data = (await response.json()) as {
+        topics?: unknown;
+        erro?: string;
+      };
+
+      if (!response.ok) {
+        setTopics([]);
+        setError(data.erro || "Nao foi possivel carregar os alinhamentos.");
+        return;
+      }
+
+      setTopics(
+        Array.isArray(data.topics)
+          ? data.topics.filter((topic): topic is string => typeof topic === "string")
+          : []
+      );
+    } catch {
+      setTopics([]);
+      setError("Nao foi possivel carregar os alinhamentos.");
+    } finally {
+      hasLoadedRef.current = true;
+      setLoading(false);
+    }
+  }, [destinationKey]);
+
+  useAutoRefresh(loadTopics, { intervalMs: TOPICS_REFRESH_INTERVAL_MS });
 
   if (loading) {
     return <p style={{ marginTop: "24px", color: "#d5e4f0" }}>Carregando alinhamentos...</p>;

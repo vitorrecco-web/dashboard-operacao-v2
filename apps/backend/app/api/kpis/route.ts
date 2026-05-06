@@ -4,6 +4,10 @@ import { listSectorKpis } from "@/lib/google-kpis";
 import { getSectorDefinition } from "@/lib/sector-config";
 import { canAccessSector } from "@/lib/user-access";
 
+const NO_STORE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate",
+};
+
 export async function GET(req: NextRequest) {
   const area = req.nextUrl.searchParams.get("area") || "";
   const setor = req.nextUrl.searchParams.get("setor") || "";
@@ -34,7 +38,7 @@ export async function GET(req: NextRequest) {
   try {
     const result = await listSectorKpis(limit);
 
-    return NextResponse.json(result);
+    return NextResponse.json(result, { headers: NO_STORE_HEADERS });
   } catch (error) {
     return NextResponse.json(
       {
@@ -46,7 +50,7 @@ export async function GET(req: NextRequest) {
         items: [],
         total: 0,
       },
-      { status: 500 }
+      { status: 500, headers: NO_STORE_HEADERS }
     );
   }
 }

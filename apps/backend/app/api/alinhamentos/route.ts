@@ -8,6 +8,10 @@ import {
 } from "@/lib/meeting-topics";
 import { canAccessSector } from "@/lib/user-access";
 
+const NO_STORE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate",
+};
+
 async function getAdminSession(req: NextRequest) {
   const token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
   const session = await verifySessionToken(token);
@@ -40,13 +44,16 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({
-    topics:
-      destinationKey === "geral"
-        ? getMeetingTopicsByDestination("geral")
-        : getMeetingTopicsForDestination(destination),
-    destinationKey,
-  });
+  return NextResponse.json(
+    {
+      topics:
+        destinationKey === "geral"
+          ? getMeetingTopicsByDestination("geral")
+          : getMeetingTopicsForDestination(destination),
+      destinationKey,
+    },
+    { headers: NO_STORE_HEADERS }
+  );
 }
 
 export async function PUT(req: NextRequest) {

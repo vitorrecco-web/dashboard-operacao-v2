@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { SectorDefinition } from "@/lib/sector-config";
+import { useAutoRefresh } from "@/components/use-auto-refresh";
 
 type Comunicado = {
   id: number;
@@ -23,6 +24,8 @@ type SectorDriveDocument = {
   size: number | null;
   openUrl: string;
 };
+
+const SECTOR_REFRESH_INTERVAL_MS = 30000;
 
 function PdfFolderIcon() {
   return (
@@ -81,54 +84,94 @@ export default function SectorOperationalPage({
   const [comunicados, setComunicados] = useState<Comunicado[]>([]);
   const [documents, setDocuments] = useState<SectorDriveDocument[]>([]);
   const [documentsMessage, setDocumentsMessage] = useState<string | null>(null);
+  const [comunicadosLoading, setComunicadosLoading] = useState(true);
+  const [documentsLoading, setDocumentsLoading] = useState(true);
+  const comunicadosLoadedRef = useRef(false);
+  const documentsLoadedRef = useRef(false);
 
   useEffect(() => {
-    async function carregar() {
-      try {
-        const res = await fetch(
-          `/api/setor-comunicados/${sector.areaKey}/${sector.sectorKey}`,
-          {
-            cache: "no-store",
-          }
-        );
+    comunicadosLoadedRef.current = false;
+    documentsLoadedRef.current = false;
+    setComunicados([]);
+    setDocuments([]);
+    setDocumentsMessage(null);
+    setComunicadosLoading(true);
+    setDocumentsLoading(true);
+  }, [sector.areaKey, sector.sectorKey]);
 
-        const data = await res.json();
-        setComunicados(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error(`Erro ao carregar comunicados de ${sector.sectorNome}:`, error);
+  const carregarComunicados = useCallback(async () => {
+    try {
+      if (!comunicadosLoadedRef.current) {
+        setComunicadosLoading(true);
+      }
+
+      const res = await fetch(
+        `/api/setor-comunicados/${sector.areaKey}/${sector.sectorKey}`,
+        {
+          cache: "no-store",
+        }
+      );
+
+      const data = (await res.json()) as unknown;
+
+      if (!res.ok) {
         setComunicados([]);
+        return;
       }
-    }
 
-    carregar();
+      setComunicados(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error(`Erro ao carregar comunicados de ${sector.sectorNome}:`, error);
+      setComunicados([]);
+    } finally {
+      comunicadosLoadedRef.current = true;
+      setComunicadosLoading(false);
+    }
   }, [sector.areaKey, sector.sectorKey, sector.sectorNome]);
 
-  useEffect(() => {
-    async function carregarDocumentos() {
-      try {
-        const res = await fetch(
-          `/api/setor-documentos/${sector.areaKey}/${sector.sectorKey}`,
-          {
-            cache: "no-store",
-          }
-        );
+  const carregarDocumentos = useCallback(async () => {
+    try {
+      if (!documentsLoadedRef.current) {
+        setDocumentsLoading(true);
+      }
 
-        const data = (await res.json()) as {
-          documents?: SectorDriveDocument[];
-          reason?: string | null;
-        };
+      const res = await fetch(
+        `/api/setor-documentos/${sector.areaKey}/${sector.sectorKey}`,
+        {
+          cache: "no-store",
+        }
+      );
 
-        setDocuments(Array.isArray(data.documents) ? data.documents : []);
-        setDocumentsMessage(data.reason ?? null);
-      } catch (error) {
-        console.error(`Erro ao carregar documentos de ${sector.sectorNome}:`, error);
+      const data = (await res.json()) as {
+        documents?: SectorDriveDocument[];
+        reason?: string | null;
+        erro?: string;
+      };
+
+      if (!res.ok) {
         setDocuments([]);
-        setDocumentsMessage("Nao foi possivel consultar os PDFs deste setor no Google Drive.");
+        setDocumentsMessage(
+          data.reason ??
+            data.erro ??
+            "Nao foi possivel consultar os PDFs deste setor no Google Drive."
+        );
+        return;
       }
-    }
 
-    carregarDocumentos();
+      setDocuments(Array.isArray(data.documents) ? data.documents : []);
+      setDocumentsMessage(data.reason ?? null);
+    } catch (error) {
+      console.error(`Erro ao carregar documentos de ${sector.sectorNome}:`, error);
+      setDocuments([]);
+      setDocumentsMessage("Nao foi possivel consultar os PDFs deste setor no Google Drive.");
+    } finally {
+      documentsLoadedRef.current = true;
+      setDocumentsLoading(false);
+    }
   }, [sector.areaKey, sector.sectorKey, sector.sectorNome]);
+
+  useAutoRefresh(carregarComunicados, { intervalMs: SECTOR_REFRESH_INTERVAL_MS });
+  useAutoRefresh(carregarDocumentos, { intervalMs: SECTOR_REFRESH_INTERVAL_MS });
 
   function formatarDataHora(data?: string | null) {
     if (!data) {
@@ -207,7 +250,18 @@ export default function SectorOperationalPage({
           </div>
         ) : null}
 
-        {documents.length === 0 ? (
+        {documentsLoading ? (
+          <div
+            style={{
+              padding: "28px",
+              border: "1px dashed #29445b",
+              borderRadius: "16px",
+              color: "#d7e0ea",
+            }}
+          >
+            Carregando PDFs do setor...
+          </div>
+        ) : documents.length === 0 ? (
           <div
             style={{
               padding: "28px",
@@ -299,7 +353,18 @@ export default function SectorOperationalPage({
           </h2>
         </div>
 
-        {comunicados.length === 0 ? (
+        {comunicadosLoading ? (
+          <div
+            style={{
+              padding: "28px",
+              border: "1px dashed #29445b",
+              borderRadius: "16px",
+              color: "#d7e0ea",
+            }}
+          >
+            Carregando comunicados...
+          </div>
+        ) : comunicados.length === 0 ? (
           <div
             style={{
               padding: "28px",
