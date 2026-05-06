@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AUTH_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
-import { listSectorKpis } from "@/lib/google-kpis";
+import { getCachedSectorKpis, listSectorKpis } from "@/lib/google-kpis";
 import { getSectorDefinition } from "@/lib/sector-config";
 import { canAccessSector } from "@/lib/user-access";
 
@@ -40,6 +40,12 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(result, { headers: NO_STORE_HEADERS });
   } catch (error) {
+    const cachedResult = getCachedSectorKpis(limit);
+
+    if (cachedResult) {
+      return NextResponse.json(cachedResult, { headers: NO_STORE_HEADERS });
+    }
+
     return NextResponse.json(
       {
         configured: true,

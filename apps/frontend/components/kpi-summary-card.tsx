@@ -17,6 +17,10 @@ type KpiResponse = {
 
 const KPI_REFRESH_INTERVAL_MS = 30000;
 
+function getKpiCacheKey(areaKey: string | null, sectorKey: string | null) {
+  return areaKey && sectorKey ? `sector-kpis:${areaKey}:${sectorKey}` : null;
+}
+
 export default function KpiSummaryCard({
   areaKey,
   sectorKey,
@@ -32,12 +36,35 @@ export default function KpiSummaryCard({
   const [data, setData] = useState<KpiResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const hasLoadedRef = useRef(false);
+  const cacheKey = getKpiCacheKey(areaKey, sectorKey);
 
   useEffect(() => {
     hasLoadedRef.current = false;
     setData(null);
     setLoading(true);
-  }, [areaKey, sectorKey]);
+
+    if (!cacheKey) {
+      return;
+    }
+
+    try {
+      const cachedValue = window.localStorage.getItem(cacheKey);
+
+      if (!cachedValue) {
+        return;
+      }
+
+      const cachedData = JSON.parse(cachedValue) as KpiResponse;
+
+      if (Array.isArray(cachedData.items) && cachedData.items.length > 0) {
+        setData(cachedData);
+        hasLoadedRef.current = true;
+        setLoading(false);
+      }
+    } catch {
+      window.localStorage.removeItem(cacheKey);
+    }
+  }, [cacheKey]);
 
   const loadKpis = useCallback(async () => {
     if (!areaKey || !sectorKey) {
@@ -69,36 +96,56 @@ export default function KpiSummaryCard({
       const items = Array.isArray(payload.items) ? payload.items : [];
 
       if (!response.ok) {
-        setData({
-          configured: payload.configured ?? true,
-          reason:
-            payload.reason ??
-            payload.erro ??
-            "Nao foi possivel consultar os KPIs da planilha agora.",
-          items: [],
-          total: 0,
+        setData((currentData) => {
+          if (currentData?.items.length) {
+            return currentData;
+          }
+
+          return {
+            configured: payload.configured ?? true,
+            reason:
+              payload.reason ??
+              payload.erro ??
+              "Nao foi possivel consultar os KPIs da planilha agora.",
+            items: [],
+            total: 0,
+          };
         });
         return;
       }
 
-      setData({
+      const nextData = {
         configured: payload.configured ?? true,
         reason: payload.reason ?? null,
         items,
         total: typeof payload.total === "number" ? payload.total : items.length,
-      });
+      };
+
+      setData(nextData);
+
+      if (cacheKey && items.length > 0) {
+        window.localStorage.setItem(cacheKey, JSON.stringify(nextData));
+      } else if (cacheKey) {
+        window.localStorage.removeItem(cacheKey);
+      }
     } catch {
-      setData({
-        configured: true,
-        reason: "Nao foi possivel consultar os KPIs da planilha agora.",
-        items: [],
-        total: 0,
+      setData((currentData) => {
+        if (currentData?.items.length) {
+          return currentData;
+        }
+
+        return {
+          configured: true,
+          reason: "Nao foi possivel consultar os KPIs da planilha agora.",
+          items: [],
+          total: 0,
+        };
       });
     } finally {
       hasLoadedRef.current = true;
       setLoading(false);
     }
-  }, [areaKey, sectorKey]);
+  }, [areaKey, cacheKey, sectorKey]);
 
   useAutoRefresh(loadKpis, { intervalMs: KPI_REFRESH_INTERVAL_MS });
 

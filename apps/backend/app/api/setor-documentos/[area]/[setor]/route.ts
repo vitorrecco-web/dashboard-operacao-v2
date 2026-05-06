@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AUTH_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
-import { listSectorDriveDocuments } from "@/lib/google-drive-documents";
+import {
+  getCachedSectorDriveDocuments,
+  listSectorDriveDocuments,
+} from "@/lib/google-drive-documents";
 import { getSectorDefinition } from "@/lib/sector-config";
 import { canAccessSector } from "@/lib/user-access";
 
@@ -70,6 +73,24 @@ export async function GET(req: NextRequest, { params }: Props) {
       { headers: NO_STORE_HEADERS }
     );
   } catch (error) {
+    const cachedResult = getCachedSectorDriveDocuments(sector);
+
+    if (cachedResult) {
+      return NextResponse.json(
+        {
+          documents: cachedResult.documents.map((item) => ({
+            ...item,
+            openUrl: `/api/setor-documentos/${params.area}/${params.setor}/arquivo?fileId=${encodeURIComponent(item.id)}`,
+          })),
+          configured: cachedResult.configured,
+          reason: cachedResult.reason,
+          cached: cachedResult.cached,
+          updatedAt: cachedResult.updatedAt,
+        },
+        { headers: NO_STORE_HEADERS }
+      );
+    }
+
     return NextResponse.json(
       {
         documents: [],

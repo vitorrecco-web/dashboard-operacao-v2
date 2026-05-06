@@ -27,6 +27,10 @@ type SectorDriveDocument = {
 
 const SECTOR_REFRESH_INTERVAL_MS = 30000;
 
+function getDocumentsCacheKey(areaKey: string, sectorKey: string) {
+  return `sector-documents:${areaKey}:${sectorKey}`;
+}
+
 function PdfFolderIcon() {
   return (
     <svg
@@ -88,16 +92,38 @@ export default function SectorOperationalPage({
   const [documentsLoading, setDocumentsLoading] = useState(true);
   const comunicadosLoadedRef = useRef(false);
   const documentsLoadedRef = useRef(false);
+  const documentsRef = useRef<SectorDriveDocument[]>([]);
+  const documentsCacheKey = getDocumentsCacheKey(sector.areaKey, sector.sectorKey);
 
   useEffect(() => {
     comunicadosLoadedRef.current = false;
     documentsLoadedRef.current = false;
+    documentsRef.current = [];
     setComunicados([]);
     setDocuments([]);
     setDocumentsMessage(null);
     setComunicadosLoading(true);
     setDocumentsLoading(true);
-  }, [sector.areaKey, sector.sectorKey]);
+
+    try {
+      const cachedValue = window.localStorage.getItem(documentsCacheKey);
+
+      if (!cachedValue) {
+        return;
+      }
+
+      const cachedDocuments = JSON.parse(cachedValue) as SectorDriveDocument[];
+
+      if (Array.isArray(cachedDocuments) && cachedDocuments.length > 0) {
+        documentsRef.current = cachedDocuments;
+        documentsLoadedRef.current = true;
+        setDocuments(cachedDocuments);
+        setDocumentsLoading(false);
+      }
+    } catch {
+      window.localStorage.removeItem(documentsCacheKey);
+    }
+  }, [documentsCacheKey, sector.areaKey, sector.sectorKey]);
 
   const carregarComunicados = useCallback(async () => {
     try {
@@ -149,26 +175,38 @@ export default function SectorOperationalPage({
       };
 
       if (!res.ok) {
-        setDocuments([]);
-        setDocumentsMessage(
-          data.reason ??
-            data.erro ??
-            "Nao foi possivel consultar os PDFs deste setor no Google Drive."
-        );
+        if (documentsRef.current.length === 0) {
+          setDocuments([]);
+          setDocumentsMessage(
+            data.reason ??
+              data.erro ??
+              "Nao foi possivel consultar os PDFs deste setor no Google Drive."
+          );
+        }
         return;
       }
 
-      setDocuments(Array.isArray(data.documents) ? data.documents : []);
+      const nextDocuments = Array.isArray(data.documents) ? data.documents : [];
+      documentsRef.current = nextDocuments;
+      setDocuments(nextDocuments);
       setDocumentsMessage(data.reason ?? null);
+
+      if (nextDocuments.length > 0) {
+        window.localStorage.setItem(documentsCacheKey, JSON.stringify(nextDocuments));
+      } else {
+        window.localStorage.removeItem(documentsCacheKey);
+      }
     } catch (error) {
       console.error(`Erro ao carregar documentos de ${sector.sectorNome}:`, error);
-      setDocuments([]);
-      setDocumentsMessage("Nao foi possivel consultar os PDFs deste setor no Google Drive.");
+      if (documentsRef.current.length === 0) {
+        setDocuments([]);
+        setDocumentsMessage("Nao foi possivel consultar os PDFs deste setor no Google Drive.");
+      }
     } finally {
       documentsLoadedRef.current = true;
       setDocumentsLoading(false);
     }
-  }, [sector.areaKey, sector.sectorKey, sector.sectorNome]);
+  }, [documentsCacheKey, sector.areaKey, sector.sectorKey, sector.sectorNome]);
 
   useAutoRefresh(carregarComunicados, { intervalMs: SECTOR_REFRESH_INTERVAL_MS });
   useAutoRefresh(carregarDocumentos, { intervalMs: SECTOR_REFRESH_INTERVAL_MS });

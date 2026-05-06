@@ -1,6 +1,6 @@
 import { google } from "googleapis";
 import type { SectorDefinition } from "@/lib/sector-config";
-import { getAppSetting } from "@/lib/comunicados-db";
+import { getAppSetting, setAppSetting } from "@/lib/comunicados-db";
 
 const GOOGLE_DRIVE_READONLY_SCOPE = "https://www.googleapis.com/auth/drive.readonly";
 
@@ -10,6 +10,11 @@ export type SectorDriveDocument = {
   mimeType: string;
   modifiedTime: string | null;
   size: number | null;
+};
+
+type SectorDriveDocumentsCache = {
+  documents: SectorDriveDocument[];
+  updatedAt: string;
 };
 
 function getRequiredEnv(name: string) {
@@ -37,6 +42,60 @@ function getSectorFolderEnvName(sector: SectorDefinition) {
 
 export function getSectorDriveFolderId(sector: SectorDefinition) {
   return process.env[getSectorFolderEnvName(sector)] ?? null;
+}
+
+function getSectorDocumentsCacheKey(sector: SectorDefinition) {
+  return `google_drive_documents_cache:${sector.setorId}`;
+}
+
+function saveSectorDriveDocumentsCache(
+  sector: SectorDefinition,
+  documents: SectorDriveDocument[]
+) {
+  try {
+    setAppSetting(
+      getSectorDocumentsCacheKey(sector),
+      JSON.stringify({
+        documents,
+        updatedAt: new Date().toISOString(),
+      } satisfies SectorDriveDocumentsCache)
+    );
+  } catch (error) {
+    console.error(
+      `Nao foi possivel salvar o cache de documentos de ${sector.setorId}:`,
+      error
+    );
+  }
+}
+
+export function getCachedSectorDriveDocuments(sector: SectorDefinition) {
+  const cachedValue = getAppSetting(getSectorDocumentsCacheKey(sector));
+
+  if (!cachedValue) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(cachedValue) as Partial<SectorDriveDocumentsCache>;
+    const documents = Array.isArray(parsed.documents)
+      ? parsed.documents.filter(
+          (item): item is SectorDriveDocument =>
+            typeof item?.id === "string" &&
+            typeof item?.name === "string" &&
+            typeof item?.mimeType === "string"
+        )
+      : [];
+
+    return {
+      documents,
+      configured: true,
+      reason: null,
+      cached: true,
+      updatedAt: typeof parsed.updatedAt === "string" ? parsed.updatedAt : null,
+    };
+  } catch {
+    return null;
+  }
 }
 
 function getAuthorizedDriveClient() {
@@ -90,18 +149,22 @@ export async function listSectorDriveDocuments(sector: SectorDefinition) {
     fields: "files(id,name,mimeType,modifiedTime,size)",
   });
 
+  const documents = (response.data.files ?? [])
+    .filter((file): file is NonNullable<typeof file> => Boolean(file?.id && file?.name))
+    .map((file) => ({
+      id: file.id as string,
+      name: file.name as string,
+      mimeType: file.mimeType || "application/pdf",
+      modifiedTime: file.modifiedTime ?? null,
+      size: normalizeSize(file.size),
+    }));
+
+  saveSectorDriveDocumentsCache(sector, documents);
+
   return {
     configured: true,
     reason: null,
-    documents: (response.data.files ?? [])
-      .filter((file): file is NonNullable<typeof file> => Boolean(file?.id && file?.name))
-      .map((file) => ({
-        id: file.id as string,
-        name: file.name as string,
-        mimeType: file.mimeType || "application/pdf",
-        modifiedTime: file.modifiedTime ?? null,
-        size: normalizeSize(file.size),
-      })),
+    documents,
   };
 }
 
